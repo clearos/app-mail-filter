@@ -1,5 +1,7 @@
 #!/bin/sh
 
+# FIXME: implement
+
 API_FILE="/etc/amavisd/api.conf"
 
 if [ -e $API_FILE ]; then
