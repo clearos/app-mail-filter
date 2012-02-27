@@ -1,0 +1,23 @@
+#!/bin/sh
+
+TIMESTAMP=`date "+%b-%d-%Y-%T"`
+
+# Set default configuration
+#--------------------------
+
+logger -p local6.notice -t installer "app-mail-filter-core - setting default configuration"
+
+if [ -e /etc/amavisd.conf ]; then
+    cp /etc/amavisd.conf /var/clearos/mail_filter/backup/amavisd.conf.$TIMESTAMP
+fi
+
+cp /usr/clearos/apps/mail_filter/deploy/amavisd.conf /etc/amavisd.conf
+
+# Set default start/boot
+#-----------------------
+
+logger -p local6.notice -t installer "app-mail-filter-core - enabling Amavis server"
+chkconfig amavisd on
+
+logger -p local6.notice -t installer "app-mail-filter-core - starting Amavis server"
+service amavisd start

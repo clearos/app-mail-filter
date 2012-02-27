@@ -1,0 +1,74 @@
+#!/bin/sh
+
+MYSQL="/usr/clearos/sandbox/usr/bin/mysql"
+MYSQLADMIN="/usr/clearos/sandbox/usr/bin/mysqladmin"
+
+DB_APP="/var/clearos/system_database/amavisd"
+DB_ROOT="/var/clearos/system_database/root"
+SQLBASE="/usr/clearos/apps/mail_filter/deploy/amavisd-mysql_objects-4.1.sql"
+AMAVIS_CONF="/etc/amavisd/api.conf"
+
+# Start system database
+#----------------------
+
+[ -x /etc/rc.d/init.d/system-mysqld ] || exit 0
+
+if [ ! -e /var/lib/system-mysql/mysql.sock ]; then
+	/etc/rc.d/init.d/system-mysqld start
+	/sbin/chkconfig system-mysqld on
+fi
+
+# Grab database password
+#-----------------------
+
+ROOTPASS=`grep ^password $DB_ROOT 2>/dev/null | sed "s/^password[[:space:]]*=[[:space:]]*//"`
+
+if [ -z "$ROOTPASS" ]; then
+	echo "Unable to authenticate with database"
+	exit 1
+fi
+
+# Create Amavisd databases (if necessary) 
+#----------------------------------------
+
+$MYSQL -uroot -p"$ROOTPASS" -e 'status;' amavisd >/dev/null 2>&1
+
+if [ $? -ne 0 ]; then
+	echo "Creating amavisd database"
+	$MYSQLADMIN -uroot -p"$ROOTPASS" create amavisd >/dev/null 2>&1
+fi
+
+# Add/Update Amavisd database password
+#--------------------------------------
+
+AMAVISD_PASSWORD=`grep ^password $DB_APP 2>/dev/null | sed "s/^password[[:space:]]*=[[:space:]]*//"`
+
+if [ -z "$AMAVISD_PASSWORD" ]; then
+	echo "Generating password"
+	AMAVISD_PASSWORD=`openssl rand -base64 20`
+	echo "password = $AMAVISD_PASSWORD" >> $DB_APP
+fi
+
+AMAVISD_PASSWORD_SEDSAFE=`echo $AMAVISD_PASSWORD | sed 's/\//\\\\\//g'`
+
+echo "Updating privileges"
+$MYSQL -uroot -p"$ROOTPASS" -e "GRANT ALL PRIVILEGES ON amavisd.* TO amavisd@localhost IDENTIFIED BY \"$AMAVISD_PASSWORD\" WITH GRANT OPTION;" amavisd >/dev/null 2>&1
+
+# Create tables (if necessary)
+#-----------------------------
+
+TABLE_EXISTS=`$MYSQL -uroot -p"$ROOTPASS" -e 'show tables;' amavisd 2>/dev/null | grep quarantine`
+
+if [ -z "$TABLE_EXISTS" ]; then
+	echo "Creating base tables"
+	$MYSQL -uroot -p"$ROOTPASS" amavisd < $SQLBASE
+fi
+
+# Update Amavis configuration file
+#------------------------------------------------
+
+CHECK=`grep "storage_sql_dsn.*$AMAVISD_PASSWORD" $AMAVIS_CONF`
+if [ -z "$CHECK" ]; then
+	echo "Setting database password in Amavis"
+	sed -i -e "s/^@storage_sql_dsn.*/@storage_sql_dsn = ( ['DBI:mysql:database=amavisd;host=127.0.0.1;port=3308', 'amavisd', '$AMAVISD_PASSWORD_SEDSAFE']);/" $AMAVIS_CONF
+fi
