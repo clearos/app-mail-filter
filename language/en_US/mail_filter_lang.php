@@ -9,3 +9,4 @@ $lang['mail_filter_bounce'] = 'Bounce';
 $lang['mail_filter_banned_file_extension_policy'] = 'Banned File Extension Policy';
 $lang['mail_filter_virus_detected_policy'] = 'Detected Virus Policy';
 $lang['mail_filter_bad_header_policy'] = 'Bad Header Policy';
+$lang['mail_filter_file_extension'] = 'File Extension';

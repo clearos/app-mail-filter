@@ -523,7 +523,7 @@ class Amavis extends Daemon
             self::POLICY_QUARANTINE => lang('mail_filter_quarantine')
         );
 
-        if (preg_match('/bad_header|banned_extension/', $policy))
+        if (preg_match('/banned_extension/', $policy))
 	        $options[self::POLICY_BOUNCE] = lang('mail_filter_bounce');
 
         return $options;
