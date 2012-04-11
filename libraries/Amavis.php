@@ -508,6 +508,28 @@ class Amavis extends Daemon
     }
 
     /**
+     * Returns a list policy options.
+     *
+     * @return array
+     */
+
+    function get_policy_options($policy = '')
+    {
+        clearos_profile(__METHOD__, __LINE__);
+            
+        $options = Array(
+            self::POLICY_PASS => lang('mail_filter_pass_through'),
+            self::POLICY_DISCARD => lang('mail_filter_discard'),
+            self::POLICY_QUARANTINE => lang('mail_filter_quarantine')
+        );
+
+        if (preg_match('/bad_header|banned_extension/', $policy))
+	        $options[self::POLICY_BOUNCE] = lang('mail_filter_bounce');
+
+        return $options;
+    }
+
+    /**
      * Returns antispam discard and quarantine settings.
      *
      * @param boolean $discard          state of discard engine
@@ -590,7 +612,7 @@ class Amavis extends Daemon
             $this->_set_parameter('$final_virus_destiny', Amavis::TYPE_DISCARD);
             $this->_set_parameter('$virus_quarantine_method', "'" . Amavis::QUARANTINE_METHOD_SQL . "'");
         } else {
-            throw new Validation_Exception(AMAVIS_LANG_VIRUS_DETECTED_POLICY . " - " . LOCALE_LANG_INVALID);
+            throw new Validation_Exception(lang('mail_filter_virus_detected_policy') . ' - ' . lang('base_invalid'));
         }
     }
 
@@ -639,7 +661,7 @@ class Amavis extends Daemon
             $this->_set_parameter('$final_bad_header_destiny', Amavis::TYPE_DISCARD);
             $this->_set_parameter('$bad_header_quarantine_method', "'" . Amavis::QUARANTINE_METHOD_SQL . "'");
         } else {
-            throw new Validation_Exception(AMAVIS_LANG_BAD_HEADER_POLICY . " - " . LOCALE_LANG_INVALID);
+            throw new Validation_Exception(lang('mail_filter_bad_header_policy') . ' - ' . lang('base_invalid'));
         }
     }
 
@@ -669,7 +691,7 @@ class Amavis extends Daemon
             $this->_set_parameter('$final_banned_destiny', Amavis::TYPE_DISCARD);
             $this->_set_parameter('$banned_files_quarantine_method', "'" . Amavis::QUARANTINE_METHOD_SQL . "'");
         } else {
-            throw new Validation_Exception(AMAVIS_LANG_BANNED_FILE_EXTENSION_POLICY . " - " . LOCALE_LANG_INVALID);
+            throw new Validation_Exception(lang('mail_filter_banned_file_extension_policy') . ' - ' . lang('base_invalid'));
         }
     }
 
