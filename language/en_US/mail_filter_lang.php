@@ -10,3 +10,4 @@ $lang['mail_filter_banned_file_extension_policy'] = 'Banned File Extension Polic
 $lang['mail_filter_virus_detected_policy'] = 'Detected Virus Policy';
 $lang['mail_filter_bad_header_policy'] = 'Bad Header Policy';
 $lang['mail_filter_file_extension'] = 'File Extension';
+$lang['mail_filter_mail_volume'] = 'Mail Volume';

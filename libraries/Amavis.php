@@ -417,6 +417,9 @@ class Amavis extends Daemon
 
         $file = new File(self::FILE_IMAGES_CONFIG);
 
+        if (!$file->exists())
+            return FALSE;
+
         $lines = $file->get_contents_as_array();
 
         foreach ($lines as $line) {
@@ -581,7 +584,7 @@ class Amavis extends Daemon
         clearos_profile(__METHOD__, __LINE__);
 
         if (! is_bool($state))
-            throw new Validation_Exception(LOCALE_LANG_ERRMSG_PARAMETER_IS_INVALID);
+            throw new Validation_Exception(lang('base_parameter_id_invalid'));
 
         if ($state)
             $this->_set_parameter('@bypass_spam_checks_maps', self::CONSTANT_REMOVE_PARAMETER);
@@ -630,7 +633,7 @@ class Amavis extends Daemon
         clearos_profile(__METHOD__, __LINE__);
 
         if (! is_bool($state))
-            throw new Validation_Exception(LOCALE_LANG_ERRMSG_PARAMETER_IS_INVALID);
+            throw new Validation_Exception(lang('base_parameter_is_invalid'));
 
         if ($state)
             $this->_set_parameter('@bypass_virus_checks_maps', self::CONSTANT_REMOVE_PARAMETER);
@@ -709,17 +712,16 @@ class Amavis extends Daemon
         clearos_profile(__METHOD__, __LINE__);
 
         $badlist = array();
-        $allowedextensions = array_keys($this->GetBannedExtensionList());
+        $allowedextensions = array_keys($this->get_banned_extension_list());
 
         foreach ($extensions as $extension) {
-            if (!in_array($extension, $allowedextensions)) {
-                $badlist[] = $extension;
-            }
+            if (!in_array($extension, $allowedextensions))
+                array_push($badlist, $extension);
         }
 
         if (count($badlist) > 0) {
             $badout = implode(' ', $badlist);
-            throw new Validation_Exception(FILETYPES_LANG_FILE_EXTENSION . " ($badout) - " . LOCALE_LANG_INVALID);
+            throw new Validation_Exception(lang('base_file_extension') . " ($badout) - " . lang('base_invalid'));
         }
 
         $this->is_loaded = FALSE;
@@ -768,11 +770,11 @@ class Amavis extends Daemon
         if (!$enabled && $state) {
             $file = new File(self::FILE_IMAGES_CONFIG . ".disabled");
             if (! $file->exists())
-                throw new Engine_Exception(LOCALE_LANG_ERRMSG_WEIRD, COMMON_ERROR);
-            $file->MoveTo(self::FILE_IMAGES_CONFIG);
+                throw new Engine_Exception(lang('base_exception_file_not_found') . ' (' . $file->get_filename() . ')', COMMON_ERROR);
+            $file->move_to(self::FILE_IMAGES_CONFIG);
         } else if ($enabled && !$state) {
             $file = new File(self::FILE_IMAGES_CONFIG);
-            $file->MoveTo(self::FILE_IMAGES_CONFIG . ".disabled");
+            $file->move_to(self::FILE_IMAGES_CONFIG . ".disabled");
 
             $emptyfile = new File(self::FILE_IMAGES_CONFIG);
             $emptyfile->create('root', 'root', '0644');
@@ -792,8 +794,8 @@ class Amavis extends Daemon
     {
         clearos_profile(__METHOD__, __LINE__);
 
-        if (! $this->IsValidMaxChildren($children))
-            throw new Validation_Exception(AMAVIS_LANG_MAIL_VOLUME . " - " . LOCALE_LANG_INVALID);
+        if (! $this->is_valid_max_children($children))
+            throw new Validation_Exception(lang('mail_filter_mail_volume') . " - " . lang('base_invalid'));
 
         $this->_set_parameter('$max_servers', $children);
     }
@@ -811,8 +813,7 @@ class Amavis extends Daemon
     {
         clearos_profile(__METHOD__, __LINE__);
 
-        if (! $this->IsValidSubjectTag($tag))
-            throw new Validation_Exception(AMAVIS_LANG_SUBJECT_TAG . " - " . LOCALE_LANG_INVALID);
+        Validation_Exception::is_valid($this->validate_subject_tag($tag));
 
         $this->_set_parameter('$sa_spam_subject_tag', "\"$tag\"");
     }
@@ -830,8 +831,7 @@ class Amavis extends Daemon
     {
         clearos_profile(__METHOD__, __LINE__);
 
-        if (! $this->IsValidSubjectTagLevel($level))
-            throw new Validation_Exception(AMAVIS_LANG_SUBJECT_TAG_LEVEL . " - " . LOCALE_LANG_INVALID);
+        Validation_Exception::is_valid($this->validate_subject_tag_level($level));
 
         $this->_set_parameter('$sa_tag2_level_deflt', $level);
     }
@@ -848,8 +848,7 @@ class Amavis extends Daemon
     {
         clearos_profile(__METHOD__, __LINE__);
 
-        if (! is_bool($rewrite))
-            throw new Validation_Exception(AMAVIS_LANG_SUBJECT_TAG_STATE . " - " . LOCALE_LANG_INVALID);
+        Validation_Exception::is_valid($this->validate_subject_tag_state($rewrite));
 
         if ($rewrite)
             $value = 1;
@@ -901,6 +900,22 @@ class Amavis extends Daemon
     }
 
     /**
+     * Validation routine for image procesing state.
+     *
+     * @param string $state image processing state
+     *
+     * @return string error message if image processing state is invalid
+     */
+    
+    public function validate_image_processing_state($state)
+    {
+        clearos_profile(__METHOD__, __LINE__);
+
+        if (!is_bool($state))
+            return lang('mail_filter_image_processing_state');
+    }
+
+    /**
      * Validation routine for subject tag.
      *
      * @param string $tag subject tag
@@ -914,6 +929,22 @@ class Amavis extends Daemon
 
         if (!(preg_match("/^[ \w-\.\[\]]+$/", $tag)))
             return lang('mail_filter_subject_tag_invalid');
+    }
+
+    /**
+     * Validation routine for subject tag state.
+     *
+     * @param string $state subject tag state
+     *
+     * @return string error message if subject tag state is invalid
+     */
+    
+    public function validate_subject_tag_state($state)
+    {
+        clearos_profile(__METHOD__, __LINE__);
+
+        if (!is_bool($state))
+            return lang('mail_filter_subject_tag_state');
     }
 
     /**
