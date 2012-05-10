@@ -523,8 +523,10 @@ class Amavis extends Daemon
         $options = Array(
             self::POLICY_PASS => lang('mail_filter_pass_through'),
             self::POLICY_DISCARD => lang('mail_filter_discard'),
-            self::POLICY_QUARANTINE => lang('mail_filter_quarantine')
         );
+
+        // FIXME: add quarantine
+        // self::POLICY_QUARANTINE => lang('mail_filter_quarantine')
 
         if (preg_match('/banned_extension/', $policy))
 	        $options[self::POLICY_BOUNCE] = lang('mail_filter_bounce');
