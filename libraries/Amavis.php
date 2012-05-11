@@ -98,7 +98,6 @@ class Amavis extends Daemon
     ///////////////////////////////////////////////////////////////////////////////
 
     const FILE_CONFIG = '/etc/amavisd/api.conf';
-    const FILE_IMAGES_CONFIG = '/etc/mail/spamassassin/FuzzyOcr.cf';
     const DEFAULT_FINAL_SPAM_DESTINY = 'D_BOUNCE';
     const DEFAULT_FINAL_VIRUS_DESTINY = 'D_DISCARD';
     const DEFAULT_KILL_LEVEL = 25;
@@ -402,32 +401,6 @@ class Amavis extends Daemon
             $this->_load_config();
 
         return $this->banned_extensions;
-    }
-
-    /**
-     * Returns state of image processing.
-     *
-     * @return boolean TRUE if image processing is enabled
-     * @throws Engine_Exception
-     */
-
-    public function get_image_processing_state()
-    {
-        clearos_profile(__METHOD__, __LINE__);
-
-        $file = new File(self::FILE_IMAGES_CONFIG);
-
-        if (!$file->exists())
-            return FALSE;
-
-        $lines = $file->get_contents_as_array();
-
-        foreach ($lines as $line) {
-            if (preg_match("/^\s*loadplugin\s+.*FuzzyOcr\s*/", $line))
-                return TRUE;
-        }
-
-        return FALSE;
     }
 
     /**
@@ -755,35 +728,6 @@ class Amavis extends Daemon
     }
 
     /**
-     * Sets state of image processing.
-     *
-     * @param boolean $state state of image processing
-     *
-     * @return void
-     * @throws Engine_Exception
-     */
-
-    public function set_image_processing_state($state)
-    {
-        clearos_profile(__METHOD__, __LINE__);
-
-        $enabled = $this->get_image_processing_state();
-
-        if (!$enabled && $state) {
-            $file = new File(self::FILE_IMAGES_CONFIG . ".disabled");
-            if (! $file->exists())
-                throw new Engine_Exception(lang('base_exception_file_not_found') . ' (' . $file->get_filename() . ')', COMMON_ERROR);
-            $file->move_to(self::FILE_IMAGES_CONFIG);
-        } else if ($enabled && !$state) {
-            $file = new File(self::FILE_IMAGES_CONFIG);
-            $file->move_to(self::FILE_IMAGES_CONFIG . ".disabled");
-
-            $emptyfile = new File(self::FILE_IMAGES_CONFIG);
-            $emptyfile->create('root', 'root', '0644');
-        }
-    }
-
-    /**
      * Sets the maximum number of children.
      *
      * @param integer $children maximum number of children to spawn.
@@ -886,6 +830,43 @@ class Amavis extends Daemon
     }
 
     /**
+     * Validation routine for discard policy level.
+     *
+     * @param string $level discard policy level
+     *
+     * @return string error message if discard policy level is invalid
+     */
+    
+    public function validate_discard_policy_level($level)
+    {
+        clearos_profile(__METHOD__, __LINE__);
+
+        if (preg_match("/^[0-9]+$/", $level))
+            return;
+
+        if (preg_match("/^[0-9]+\.[0-9]{1,2}$/", $level))
+            return;
+
+        return lang('mail_filter_discard_policy_level_invalid');
+    }
+
+    /**
+     * Validation routine for discard policy tag state.
+     *
+     * @param string $state discard policy tag state
+     *
+     * @return string error message if discard policy tag state is invalid
+     */
+    
+    public function validate_discard_policy_state($state)
+    {
+        clearos_profile(__METHOD__, __LINE__);
+
+        if (!clearos_is_valid_boolean($state))
+            return lang('mail_filter_discard_policy_state_invalid');
+    }
+
+    /**
      * Validation routine for max children.
      *
      * @param string $children max children
@@ -899,22 +880,6 @@ class Amavis extends Daemon
 
         if (!(preg_match("/^\d+$/", $children) && ($children > 0) && ($children <= 100)))
             return lang('mail_filter_max_children_invalid');
-    }
-
-    /**
-     * Validation routine for image procesing state.
-     *
-     * @param string $state image processing state
-     *
-     * @return string error message if image processing state is invalid
-     */
-    
-    public function validate_image_processing_state($state)
-    {
-        clearos_profile(__METHOD__, __LINE__);
-
-        if (!is_bool($state))
-            return lang('mail_filter_image_processing_state');
     }
 
     /**
@@ -945,8 +910,8 @@ class Amavis extends Daemon
     {
         clearos_profile(__METHOD__, __LINE__);
 
-        if (!is_bool($state))
-            return lang('mail_filter_subject_tag_state');
+        if (!clearos_is_valid_boolean($state))
+            return lang('mail_filter_subject_tag_state_invalid');
     }
 
     /**

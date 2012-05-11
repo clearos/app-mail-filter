@@ -1,9 +1,9 @@
 
 Name: app-mail-filter
 Epoch: 1
-Version: 1.0.6
+Version: 1.1.4
 Release: 1%{dist}
-Summary: Mail Filter Engine - APIs and install
+Summary: Mail Filter Engine - Core
 License: LGPLv3
 Group: ClearOS/Libraries
 Source: app-mail-filter-%{version}.tar.gz
@@ -13,8 +13,9 @@ Buildarch: noarch
 The Mail Filter Engine provides a core set of tools for filtering inbound and outbound mail messages.
 
 %package core
-Summary: Mail Filter Engine - APIs and install
+Summary: Mail Filter Engine - Core
 Requires: app-base-core
+Requires: app-mail-routing-core
 Requires: app-network-core
 Requires: app-smtp-core
 Requires: amavisd-new >= 2.6.5

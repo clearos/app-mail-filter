@@ -5,7 +5,7 @@
 /////////////////////////////////////////////////////////////////////////////
 
 $app['basename'] = 'mail_filter';
-$app['version'] = '1.0.6';
+$app['version'] = '1.1.4';
 $app['release'] = '1';
 $app['vendor'] = 'ClearFoundation';
 $app['packager'] = 'ClearFoundation';
@@ -29,9 +29,10 @@ $app['menu_enabled'] = FALSE;
 $app['core_only'] =  TRUE;
 
 $app['core_requires'] = array(
+    'app-mail-routing-core',
     'app-network-core',
     'app-smtp-core',
-    'amavisd-new >= 2.6.5'
+    'amavisd-new >= 2.6.5',
 );
 
 $app['core_directory_manifest'] = array(

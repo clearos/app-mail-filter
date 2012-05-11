@@ -19,7 +19,7 @@ clearos_load_language('mail_filter');
 
 $configlet = array(
 	'title' => lang('mail_filter_app_name'),
-	'package' => 'amavisd',
+	'package' => 'amavisd-new',
 	'process_name' => 'amavisd',
 	'pid_file' => '/var/run/amavisd.pid',
 	'reloadable' => FALSE,
