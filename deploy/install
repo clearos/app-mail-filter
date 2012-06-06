@@ -21,3 +21,10 @@ chkconfig amavisd on
 
 logger -p local6.notice -t installer "app-mail-filter-core - starting Amavis server"
 service amavisd start
+
+# Clam daemon may need to pick up group permissions
+#--------------------------------------------------
+
+# Note: condrestart is broken, tracker #637
+CHECK=`/sbin/pidof clamd`
+[ -n "$CHECK" ] && /sbin/service clamd restart >/dev/null 2>&1
