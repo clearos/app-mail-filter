@@ -28,3 +28,8 @@ service amavisd start
 # Note: condrestart is broken, tracker #637
 CHECK=`/sbin/pidof clamd`
 [ -n "$CHECK" ] && /sbin/service clamd restart >/dev/null 2>&1
+
+# Reload clearsyncd
+#------------------
+
+/sbin/service clearsyncd condrestart >/dev/null 2>&1

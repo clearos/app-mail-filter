@@ -59,16 +59,17 @@ use \clearos\apps\base\Daemon as Daemon;
 use \clearos\apps\base\File as File;
 use \clearos\apps\base\File_Types as File_Types;
 use \clearos\apps\mail_filter\Amavis as Amavis;
+use \clearos\apps\smtp\Postfix as Postfix;
 
 clearos_load_library('base/Daemon');
 clearos_load_library('base/File');
 clearos_load_library('base/File_Types');
 clearos_load_library('mail_filter/Amavis');
+clearos_load_library('smtp/Postfix');
 
 // Exceptions
 //-----------
 
-use \Exception as Exception;
 use \clearos\apps\base\Engine_Exception as Engine_Exception;
 use \clearos\apps\base\Validation_Exception as Validation_Exception;
 
@@ -802,6 +803,48 @@ class Amavis extends Daemon
             $value = 0;
 
         $this->_set_parameter('$sa_spam_modifies_subj', $value);
+    }
+
+    /**
+     * Synchronizes domain information from Postfix configuration.
+     *
+     * @return void
+     */
+
+    public function synchronize_domains()
+    {
+        clearos_profile(__METHOD__, __LINE__);
+
+        $postfix = new Postfix();
+
+        // Local domain maps
+        //------------------
+
+        $local_domains = $postfix->get_local_domains();
+
+        $local_domains_maps = "";
+
+        foreach ($local_domains as $domain) 
+            $local_domains_maps .= " \".$domain\",";
+
+        $local_domains_maps = ltrim($local_domains_maps);
+        $local_domains_maps = rtrim($local_domains_maps, ",");
+echo "( [ $local_domains_maps ] )\n";
+
+        $file = new File(self::FILE_CONFIG);
+        $file->replace_lines('/^@local_domains_maps\s*=\s*/', "@local_domains_maps = ( [ $local_domains_maps ] );\n");
+
+        // Primary domain
+        //---------------
+
+        $primary_domain = $postfix->get_domain();
+        $primary_domain =  "\$mydomain = \"$primary_domain\";\n";
+
+        $file = new File(self::FILE_CONFIG);
+        $match = $file->replace_lines('/^\$mydomain\s*=\s*/', $primary_domain);
+
+        if ($match === 0)
+            $file->add_lines_before($primary_domain, '/^@local_domains_maps\s*=/');
     }
 
     ///////////////////////////////////////////////////////////////////////////////
