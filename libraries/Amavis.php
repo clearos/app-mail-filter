@@ -829,7 +829,6 @@ class Amavis extends Daemon
 
         $local_domains_maps = ltrim($local_domains_maps);
         $local_domains_maps = rtrim($local_domains_maps, ",");
-echo "( [ $local_domains_maps ] )\n";
 
         $file = new File(self::FILE_CONFIG);
         $file->replace_lines('/^@local_domains_maps\s*=\s*/', "@local_domains_maps = ( [ $local_domains_maps ] );\n");
