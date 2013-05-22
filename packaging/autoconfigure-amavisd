@@ -4,9 +4,9 @@
 /**
  * Autoconfigure mail domains for Amavis.
  *
- * @category   Apps
- * @package    Mail_Filter
- * @subpackage Scripts
+ * @category   apps
+ * @package    mail-filter
+ * @subpackage scripts
  * @author     ClearFoundation <developer@clearfoundation.com>
  * @copyright  2012 ClearFoundation
  * @license    http://www.gnu.org/copyleft/gpl.html GNU General Public License version 3 or later
