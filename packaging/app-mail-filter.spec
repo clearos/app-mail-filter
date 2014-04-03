@@ -1,7 +1,7 @@
 
 Name: app-mail-filter
 Epoch: 1
-Version: 1.2.2
+Version: 1.5.40
 Release: 1%{dist}
 Summary: Mail Filter Engine - Core
 License: LGPLv3
@@ -15,11 +15,11 @@ The Mail Filter Engine provides a core set of tools for filtering inbound and ou
 %package core
 Summary: Mail Filter Engine - Core
 Requires: app-base-core
+Requires: app-events-core
 Requires: app-mail-routing-core
 Requires: app-network-core
-Requires: app-smtp-core
+Requires: app-smtp-core >= 1:1.5.40
 Requires: amavisd-new >= 2.6.5
-Requires: csplugin-filewatch
 
 %description core
 The Mail Filter Engine provides a core set of tools for filtering inbound and outbound mail messages.
@@ -38,8 +38,7 @@ install -d -m 0755 %{buildroot}/var/clearos/mail_filter
 install -d -m 0755 %{buildroot}/var/clearos/mail_filter/backup
 install -D -m 0644 packaging/amavisd.php %{buildroot}/var/clearos/base/daemon/amavisd.php
 install -D -m 0644 packaging/api.conf %{buildroot}/etc/amavisd/api.conf
-install -D -m 0755 packaging/autoconfigure-amavisd %{buildroot}/usr/sbin/autoconfigure-amavisd
-install -D -m 0644 packaging/filewatch-mail-filter-configuration.conf %{buildroot}/etc/clearsync.d/filewatch-mail-filter-configuration.conf
+install -D -m 0755 packaging/smtp-event %{buildroot}/var/clearos/events/smtp/mail_filter
 
 %post core
 logger -p local6.notice -t installer 'app-mail-filter-core - installing'
@@ -63,7 +62,6 @@ exit 0
 %files core
 %defattr(-,root,root)
 %exclude /usr/clearos/apps/mail_filter/packaging
-%exclude /usr/clearos/apps/mail_filter/tests
 %dir /usr/clearos/apps/mail_filter
 %dir /var/clearos/mail_filter
 %dir /var/clearos/mail_filter/backup
@@ -72,5 +70,4 @@ exit 0
 /usr/clearos/apps/mail_filter/libraries
 /var/clearos/base/daemon/amavisd.php
 %config(noreplace) /etc/amavisd/api.conf
-/usr/sbin/autoconfigure-amavisd
-/etc/clearsync.d/filewatch-mail-filter-configuration.conf
+/var/clearos/events/smtp/mail_filter

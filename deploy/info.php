@@ -5,7 +5,7 @@
 /////////////////////////////////////////////////////////////////////////////
 
 $app['basename'] = 'mail_filter';
-$app['version'] = '1.2.2';
+$app['version'] = '1.5.40';
 $app['release'] = '1';
 $app['vendor'] = 'ClearFoundation';
 $app['packager'] = 'ClearFoundation';
@@ -29,11 +29,11 @@ $app['menu_enabled'] = FALSE;
 $app['core_only'] =  TRUE;
 
 $app['core_requires'] = array(
+    'app-events-core',
     'app-mail-routing-core',
     'app-network-core',
-    'app-smtp-core',
+    'app-smtp-core >= 1:1.5.40',
     'amavisd-new >= 2.6.5',
-    'csplugin-filewatch',
 );
 
 $app['core_directory_manifest'] = array(
@@ -43,15 +43,14 @@ $app['core_directory_manifest'] = array(
 
 $app['core_file_manifest'] = array(
     'amavisd.php' => array('target' => '/var/clearos/base/daemon/amavisd.php'),
-    'filewatch-mail-filter-configuration.conf'=> array('target' => '/etc/clearsync.d/filewatch-mail-filter-configuration.conf'),
     'api.conf' => array(
         'target' => '/etc/amavisd/api.conf',
         'mode' => '0644',
         'config' => TRUE,
         'config_params' => 'noreplace',
     ),
-    'autoconfigure-amavisd' => array(
-        'target' => '/usr/sbin/autoconfigure-amavisd',
-        'mode' => '0755',
+    'smtp-event'=> array(
+        'target' => '/var/clearos/events/smtp/mail_filter',
+        'mode' => '0755'
     ),
 );

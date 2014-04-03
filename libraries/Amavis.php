@@ -815,12 +815,15 @@ class Amavis extends Daemon
     {
         clearos_profile(__METHOD__, __LINE__);
 
+        $file = new File(self::FILE_CONFIG);
         $postfix = new Postfix();
+
+        $primary_domain = $postfix->get_domain();
+        $local_domains = $postfix->get_local_domains();
+        $restart = FALSE;
 
         // Local domain maps
         //------------------
-
-        $local_domains = $postfix->get_local_domains();
 
         $local_domains_maps = "";
 
@@ -829,21 +832,43 @@ class Amavis extends Daemon
 
         $local_domains_maps = ltrim($local_domains_maps);
         $local_domains_maps = rtrim($local_domains_maps, ",");
+        $local_domains_maps = "@local_domains_maps = ( [ $local_domains_maps ] );";
 
-        $file = new File(self::FILE_CONFIG);
-        $file->replace_lines('/^@local_domains_maps\s*=\s*/', "@local_domains_maps = ( [ $local_domains_maps ] );\n");
+        $check = $file->lookup_line('/^@local_domains_maps\s*=\s*/');
+
+        if (trim($check) != trim($local_domains_maps)) {
+            $file->replace_lines('/^@local_domains_maps\s*=\s*/', "$local_domains_maps\n");
+
+            $restart = TRUE;
+
+            clearos_log('mail_filter', 'updated domain maps');
+        }
 
         // Primary domain
         //---------------
 
-        $primary_domain = $postfix->get_domain();
         $primary_domain =  "\$mydomain = \"$primary_domain\";\n";
 
-        $file = new File(self::FILE_CONFIG);
-        $match = $file->replace_lines('/^\$mydomain\s*=\s*/', $primary_domain);
+        $check = $file->lookup_line('/^\$mydomain\s*=\s*/');
 
-        if ($match === 0)
-            $file->add_lines_before($primary_domain, '/^@local_domains_maps\s*=/');
+        if (trim($check) != trim($primary_domain)) {
+            $file = new File(self::FILE_CONFIG);
+            $match = $file->replace_lines('/^\$mydomain\s*=\s*/', $primary_domain);
+
+            if ($match === 0)
+                $file->add_lines_before($primary_domain, '/^@local_domains_maps\s*=/');
+
+            $restart = TRUE;
+
+            clearos_log('mail_filter', 'updated primary domain');
+        }
+
+        if ($restart) {
+            if ($this->get_running_state()) {
+                $this->reset();
+                clearos_log('mail_filter', 'reloading daemon');
+            }
+        }
     }
 
     ///////////////////////////////////////////////////////////////////////////////
