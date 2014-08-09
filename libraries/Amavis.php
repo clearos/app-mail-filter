@@ -561,7 +561,7 @@ class Amavis extends Daemon
         clearos_profile(__METHOD__, __LINE__);
 
         if (! is_bool($state))
-            throw new Validation_Exception(lang('base_validate_state_invalid'));
+            throw new Validation_Exception(lang('base_state_invalid'));
 
         if ($state)
             $this->_set_parameter('@bypass_spam_checks_maps', self::CONSTANT_REMOVE_PARAMETER);
@@ -610,7 +610,7 @@ class Amavis extends Daemon
         clearos_profile(__METHOD__, __LINE__);
 
         if (! is_bool($state))
-            throw new Validation_Exception(lang('base_validate_state_invalid'));
+            throw new Validation_Exception(lang('base_state_invalid'));
 
         if ($state)
             $this->_set_parameter('@bypass_virus_checks_maps', self::CONSTANT_REMOVE_PARAMETER);
@@ -931,7 +931,7 @@ class Amavis extends Daemon
         clearos_profile(__METHOD__, __LINE__);
 
         if (!clearos_is_valid_boolean($state))
-            return lang('base_validate_state_invalid');
+            return lang('base_state_invalid');
     }
 
     /**
@@ -963,7 +963,7 @@ class Amavis extends Daemon
         clearos_profile(__METHOD__, __LINE__);
 
         if (!clearos_is_valid_boolean($state))
-            return lang('base_validate_state_invalid');
+            return lang('base_state_invalid');
     }
 
     /**
