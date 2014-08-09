@@ -47,6 +47,7 @@ require_once $bootstrap . '/bootstrap.php';
 ///////////////////////////////////////////////////////////////////////////////
 
 clearos_load_language('mail_filter');
+clearos_load_language('mail');
 
 ///////////////////////////////////////////////////////////////////////////////
 // D E P E N D E N C I E S
@@ -495,15 +496,15 @@ class Amavis extends Daemon
         clearos_profile(__METHOD__, __LINE__);
             
         $options = Array(
-            self::POLICY_PASS => lang('mail_filter_pass_through'),
-            self::POLICY_DISCARD => lang('mail_filter_discard'),
+            self::POLICY_PASS => lang('mail_pass_through'),
+            self::POLICY_DISCARD => lang('mail_discard'),
         );
 
         // FIXME: add quarantine
         // self::POLICY_QUARANTINE => lang('mail_filter_quarantine')
 
         if (preg_match('/banned_extension/', $policy))
-	        $options[self::POLICY_BOUNCE] = lang('mail_filter_bounce');
+	        $options[self::POLICY_BOUNCE] = lang('mail_bounce');
 
         return $options;
     }
@@ -560,7 +561,7 @@ class Amavis extends Daemon
         clearos_profile(__METHOD__, __LINE__);
 
         if (! is_bool($state))
-            throw new Validation_Exception(lang('base_parameter_id_invalid'));
+            throw new Validation_Exception(lang('base_validate_state_invalid'));
 
         if ($state)
             $this->_set_parameter('@bypass_spam_checks_maps', self::CONSTANT_REMOVE_PARAMETER);
@@ -609,7 +610,7 @@ class Amavis extends Daemon
         clearos_profile(__METHOD__, __LINE__);
 
         if (! is_bool($state))
-            throw new Validation_Exception(lang('base_parameter_is_invalid'));
+            throw new Validation_Exception(lang('base_validate_state_invalid'));
 
         if ($state)
             $this->_set_parameter('@bypass_virus_checks_maps', self::CONSTANT_REMOVE_PARAMETER);
@@ -893,7 +894,7 @@ class Amavis extends Daemon
         if (preg_match('/^[0-9]+\.[0-9]{1,2}$/', $level))
             return;
 
-        return lang('mail_filter_block_level_invalid');
+        return lang('base_threshold_invalid');
     }
 
     /**
@@ -914,7 +915,7 @@ class Amavis extends Daemon
         if (preg_match("/^[0-9]+\.[0-9]{1,2}$/", $level))
             return;
 
-        return lang('mail_filter_discard_policy_level_invalid');
+        return lang('base_threshold_invalid');
     }
 
     /**
@@ -930,23 +931,7 @@ class Amavis extends Daemon
         clearos_profile(__METHOD__, __LINE__);
 
         if (!clearos_is_valid_boolean($state))
-            return lang('mail_filter_discard_policy_state_invalid');
-    }
-
-    /**
-     * Validation routine for max children.
-     *
-     * @param string $children max children
-     *
-     * @return string error message if max children is invalid
-     */
-    
-    public function validate_max_children($children)
-    {
-        clearos_profile(__METHOD__, __LINE__);
-
-        if (!(preg_match("/^\d+$/", $children) && ($children > 0) && ($children <= 100)))
-            return lang('mail_filter_max_children_invalid');
+            return lang('base_validate_state_invalid');
     }
 
     /**
@@ -978,7 +963,7 @@ class Amavis extends Daemon
         clearos_profile(__METHOD__, __LINE__);
 
         if (!clearos_is_valid_boolean($state))
-            return lang('mail_filter_subject_tag_state_invalid');
+            return lang('base_validate_state_invalid');
     }
 
     /**
@@ -999,7 +984,7 @@ class Amavis extends Daemon
         if (preg_match("/^[0-9]+\.[0-9]{1,2}$/", $level))
             return;
 
-        return lang('mail_filter_subject_tag_level_invalid');
+        return lang('base_threshold_invalid');
     }
 
     ///////////////////////////////////////////////////////////////////////////////

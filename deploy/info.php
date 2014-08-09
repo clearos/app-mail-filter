@@ -29,6 +29,7 @@ $app['menu_enabled'] = FALSE;
 $app['core_only'] =  TRUE;
 
 $app['core_requires'] = array(
+    'app-base-core >= 1:1.6.5',
     'app-events-core',
     'app-mail-routing-core',
     'app-network-core',
