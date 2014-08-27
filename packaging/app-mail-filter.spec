@@ -1,7 +1,7 @@
 
 Name: app-mail-filter
 Epoch: 1
-Version: 1.6.0
+Version: 1.6.5
 Release: 1%{dist}
 Summary: Mail Filter Engine - Core
 License: LGPLv3
@@ -15,6 +15,7 @@ The Mail Filter Engine provides a core set of tools for filtering inbound and ou
 %package core
 Summary: Mail Filter Engine - Core
 Requires: app-base-core
+Requires: app-base-core >= 1:1.6.5
 Requires: app-events-core
 Requires: app-mail-routing-core
 Requires: app-network-core
