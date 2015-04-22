@@ -29,7 +29,7 @@ service amavisd start >/dev/null 2>&1
 CHECK=`/sbin/pidof clamd`
 [ -n "$CHECK" ] && /sbin/service clamd restart >/dev/null 2>&1
 
-# Reload clearsyncd
-#------------------
+# Trigger configuration event
+#----------------------------
 
-/sbin/service clearsyncd condrestart >/dev/null 2>&1
+/var/clearos/events/smtp/mail_filter
